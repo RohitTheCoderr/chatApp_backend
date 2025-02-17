@@ -1,0 +1,28 @@
+import UserProfileModel from "../../models/userModels/userSchema"
+import { OTPgeneValidation } from "../../schemaValidate/userAlldataVali/profilerelatedValidation"
+
+
+export const checkingExist = async (req, res, next) => {
+    try {
+        const { mobileNo, email } = await OTPgeneValidation.validateAsync(req.body)
+
+        let user
+
+        if (email) {
+            user = await UserProfileModel.findOne({ email })
+        }
+        else if (mobileNo) {
+            user = await UserProfileModel.findOne({ mobileNo })
+        }
+
+        if (req?.baseUrl == "/api/users/otp_generate") {
+            if (user) {
+                return res.status(400).json({ success: false, message: "user Already exist" })
+            }
+            return next();
+        }
+
+    } catch (error) {
+        next(error);
+    }
+}
